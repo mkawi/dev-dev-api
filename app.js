@@ -17,4 +17,10 @@ app.use(handleCustomErrors);
 app.use(handlePsqlErrors);
 app.use(handleServerErrors);
 
+// Catch-all 404 Handler
+app.all("*", (req, res) => {
+	const { method, url } = req;
+	res.status(404).send({ error: `${method} ${url} route not found` });
+});
+
 module.exports = app;
