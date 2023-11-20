@@ -2,7 +2,10 @@ const express = require("express");
 const app = express();
 
 // Controllers
+const { getApi } = require("./controllers/getApi.controller");
 const { getTopics } = require("./controllers/topic.controller");
+
+app.get("/api", getApi);
 
 app.get("/api/topics", getTopics);
 
