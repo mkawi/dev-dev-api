@@ -15,8 +15,10 @@ describe("GET: /api", () => {
 			.expect(200)
 			.expect("Content-Type", /json/)
 			.then(({ body }) => {
-				Object.keys(body).forEach((key) => {
-					expect(body[key]).toMatchObject({
+				const { endpoints } = body;
+
+				Object.keys(endpoints).forEach((key) => {
+					expect(endpoints[key]).toMatchObject({
 						description: expect.any(String),
 						queries: expect.any(Array),
 						format: expect.any(Object),
