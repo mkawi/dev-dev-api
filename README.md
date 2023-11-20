@@ -1,3 +1,13 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+## Setup
+
+Follow these steps to setup your local environment:
+
+```
+git clone https://github.com/mkawi/dev-dev-api.git
+cd dev-dev-api
+
+touch .env.development && echo PGDATABASE=nc_news > .env.development
+touch .env.test && echo PGDATABASE=nc_news_test > .env.test
+```
