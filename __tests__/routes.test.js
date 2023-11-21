@@ -132,6 +132,15 @@ describe("GET: /api/articles/:article_id/comments", () => {
 				expect(body.msg).toBe("No article found with the id: 1000");
 			});
 	});
+
+	test("400: responds with bad request if the requested article_id is not of datatype integer", () => {
+		return request(app)
+			.get("/api/articles/agents/comments")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
+			});
+	});
 });
 
 describe("404: Handle routes that don't exist", () => {
