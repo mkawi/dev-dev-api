@@ -143,6 +143,35 @@ describe("GET: /api/articles/:article_id/comments", () => {
 	});
 });
 
+describe("GET: /api/articles", () => {
+	test("200: successfully responds with an array of article objects without the body property and ordered by created_at date", () => {
+		return request(app)
+			.get("/api/articles")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { articles } }) => {
+				expect(articles.length).toBe(13);
+
+				articles.forEach((article) => {
+					expect(article).toMatchObject({
+						article_id: expect.any(Number),
+						title: expect.any(String),
+						author: expect.any(String),
+						topic: expect.any(String),
+						created_at: expect.any(String),
+						votes: expect.any(Number),
+						article_img_url: expect.any(String),
+						comment_count: expect.any(Number),
+					});
+
+					expect(article.body).toBe(undefined);
+				});
+
+				expect(articles).toBeSortedBy("created_at", { descending: true });
+			});
+	});
+});
+
 describe("404: Handle routes that don't exist", () => {
 	test("GET requests", () => {
 		return request(app)
