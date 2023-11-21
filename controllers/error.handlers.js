@@ -7,11 +7,7 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handlePsqlErrors = (err, req, res, next) => {
-	if (err.code) {
-		// Handle specific PSQL error here
-	} else {
-		next(err);
-	}
+	next(err);
 };
 
 exports.handleServerErrors = (err, req, res, next) => {

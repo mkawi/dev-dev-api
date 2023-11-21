@@ -27,6 +27,19 @@ describe("GET: /api", () => {
 				});
 			});
 	});
+
+	// This test only works if you move the endpoints.json file out the root directory
+	// Move endpoints.json file and uncomment out this test to ensure error is thrown
+	// ================
+
+	// test.only("500: responds with server error if file is missing", () => {
+	// 	return request(app)
+	// 		.get("/api")
+	// 		.expect(500)
+	// 		.then(({ body }) => {
+	// 			expect(body.msg).toBe("Internal Server Error!");
+	// 		});
+	// });
 });
 
 describe("GET: /api/topics", () => {
