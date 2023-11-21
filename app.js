@@ -4,10 +4,13 @@ const app = express();
 // Controllers
 const { getApi } = require("./controllers/getApi.controller");
 const { getTopics } = require("./controllers/topic.controller");
+const { getArticleById } = require("./controllers/article.controller");
 
 app.get("/api", getApi);
 
 app.get("/api/topics", getTopics);
+
+app.get("/api/articles/:article_id", getArticleById);
 
 // 404 & Error Handlers
 const {
