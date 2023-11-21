@@ -15,7 +15,8 @@ exports.selectAllArticles = () => {
 			return rows.map((article) => {
 				return { ...article, comment_count: Number(article.comment_count) };
 			});
- };
+		});
+};
 
 exports.selectArticleById = (article_id) => {
 	return db
