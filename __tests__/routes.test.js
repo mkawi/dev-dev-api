@@ -52,7 +52,7 @@ describe("GET: /api/topics", () => {
 });
 
 describe("GET: /api/articles", () => {
-	test("200: successfully responds with an array of article objects", () => {
+	test("200: successfully responds with an array of article objects without the body property and ordered by created_at date", () => {
 		return request(app)
 			.get("/api/articles")
 			.expect(200)
@@ -71,9 +71,11 @@ describe("GET: /api/articles", () => {
 						article_img_url: expect.any(String),
 						comment_count: expect.any(Number),
 					});
+
+					expect(article.body).toBe(undefined);
 				});
 
-				expect(articles).toBeSortedBy("date", { descending: true });
+				expect(articles).toBeSortedBy("created_at", { descending: true });
 			});
 	});
 });
