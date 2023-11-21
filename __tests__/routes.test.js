@@ -48,6 +48,35 @@ describe("GET: /api/topics", () => {
 	});
 });
 
+describe("GET: /api/articles", () => {
+	test("200: successfully responds with an array of article objects without the body property and ordered by created_at date", () => {
+		return request(app)
+			.get("/api/articles")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { articles } }) => {
+				expect(articles.length).toBe(13);
+
+				articles.forEach((article) => {
+					expect(article).toMatchObject({
+						article_id: expect.any(Number),
+						title: expect.any(String),
+						author: expect.any(String),
+						topic: expect.any(String),
+						created_at: expect.any(String),
+						votes: expect.any(Number),
+						article_img_url: expect.any(String),
+						comment_count: expect.any(Number),
+					});
+
+					expect(article.body).toBe(undefined);
+				});
+
+				expect(articles).toBeSortedBy("created_at", { descending: true });
+			});
+	});
+});
+
 describe("GET: /api/articles/:article_id", () => {
 	test("200: successfully responds with a JSON of a single article with the same article_id as the route parameter", () => {
 		return request(app)
@@ -139,35 +168,6 @@ describe("GET: /api/articles/:article_id/comments", () => {
 			.expect(400)
 			.then(({ body }) => {
 				expect(body.msg).toBe("Bad Request!");
-			});
-	});
-});
-
-describe("GET: /api/articles", () => {
-	test("200: successfully responds with an array of article objects without the body property and ordered by created_at date", () => {
-		return request(app)
-			.get("/api/articles")
-			.expect(200)
-			.expect("Content-Type", /json/)
-			.then(({ body: { articles } }) => {
-				expect(articles.length).toBe(13);
-
-				articles.forEach((article) => {
-					expect(article).toMatchObject({
-						article_id: expect.any(Number),
-						title: expect.any(String),
-						author: expect.any(String),
-						topic: expect.any(String),
-						created_at: expect.any(String),
-						votes: expect.any(Number),
-						article_img_url: expect.any(String),
-						comment_count: expect.any(Number),
-					});
-
-					expect(article.body).toBe(undefined);
-				});
-
-				expect(articles).toBeSortedBy("created_at", { descending: true });
 			});
 	});
 });
