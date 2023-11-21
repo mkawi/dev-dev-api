@@ -8,6 +8,27 @@ const seed = require("../db/seeds/seed");
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
 
+describe("GET: /api", () => {
+	test("200: successfully responds with JSON of all available endpoints along with their related information", () => {
+		return request(app)
+			.get("/api")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body }) => {
+				const { endpoints } = body;
+
+				Object.keys(endpoints).forEach((key) => {
+					expect(endpoints[key]).toMatchObject({
+						description: expect.any(String),
+						queries: expect.any(Array),
+						format: expect.any(Object),
+						exampleResponse: expect.any(Object),
+					});
+				});
+			});
+	});
+});
+
 describe("GET: /api/topics", () => {
 	test("200: successfully responds with an array of topic objects", () => {
 		return request(app)
