@@ -40,13 +40,52 @@ describe("GET: /api/topics", () => {
 
 				topics.forEach((topic) => {
 					expect(topic).toMatchObject({
-						description: topic.description,
-						slug: topic.slug,
+						description: expect.any(String),
+						slug: expect.any(String),
 					});
-
-					expect(typeof topic.description).toBe("string");
-					expect(typeof topic.slug).toBe("string");
 				});
+			});
+	});
+});
+
+describe("GET: /api/articles/:article_id", () => {
+	test("200: successfully responds with a JSON of a single article with the same article_id as the route parameter", () => {
+		return request(app)
+			.get("/api/articles/3")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { article } }) => {
+				expect(article).toMatchObject({
+					article_id: expect.any(Number),
+					title: expect.any(String),
+					topic: expect.any(String),
+					author: expect.any(String),
+					body: expect.any(String),
+					created_at: expect.any(String),
+					votes: expect.any(Number),
+					article_img_url: expect.any(String),
+				});
+			});
+	});
+
+	test("404: responds with 404 article not found if there is no article with the requested article_id", () => {
+		return request(app)
+			.get("/api/articles/5000")
+			.expect(404)
+			.expect("Content-Type", /json/)
+			.then(({ body }) => {
+				expect(body.status).toBe(404);
+				expect(body.msg).toBe("No article found with the id: 5000");
+			});
+	});
+
+	test("400: responds with bad request if the requested article_id is not the same datatype as database article_id (integer)", () => {
+		return request(app)
+			.get("/api/articles/robots")
+			.expect(400)
+			.expect("Content-Type", /json/)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
 			});
 	});
 });
