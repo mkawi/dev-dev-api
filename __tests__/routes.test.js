@@ -173,10 +173,10 @@ describe("GET: /api/articles/:article_id/comments", () => {
 });
 
 describe("POST: /api/articles/:article_id/comments", () => {
-	test("200: successfully adds a new comment to the specified article and returns it along with its primary and foreign keys", () => {
+	test("201: successfully adds a new comment to the specified article and returns it along with its primary and foreign keys", () => {
 		return request(app)
 			.post("/api/articles/5/comments")
-			.expect(200)
+			.expect(201)
 			.expect("Content-Type", /json/)
 			.send({
 				username: "lurker",
@@ -194,10 +194,10 @@ describe("POST: /api/articles/:article_id/comments", () => {
 			});
 	});
 
-	test("200: successfully adds a new comment even if there are additional irrelevant properties in the request body", () => {
+	test("201: successfully adds a new comment even if there are additional irrelevant properties in the request body", () => {
 		return request(app)
 			.post("/api/articles/5/comments")
-			.expect(200)
+			.expect(201)
 			.expect("Content-Type", /json/)
 			.send({
 				username: "lurker",
@@ -266,10 +266,26 @@ describe("POST: /api/articles/:article_id/comments", () => {
 			.expect(404)
 			.send({
 				username: "gandalf_the_grey",
+				body: "have you tried turning it off and on again? :)",
+			})
+			.then(({ body }) => {
+				expect(body.msg).toBe(
+					"No valid user with the username: gandalf_the_grey"
+				);
+			});
+	});
+
+	test("404: responds with 404 article not found if there is no article with the requested article_id", () => {
+		return request(app)
+			.post("/api/articles/9999/comments")
+			.expect(404)
+			.send({
+				username: "lurker",
 				body: "YOU SHALL NOT PASS!",
 			})
 			.then(({ body }) => {
-				expect(body.msg).toBe("No valid user with the username: gandalf_the_grey");
+				expect(body.status).toBe(404);
+				expect(body.msg).toBe("No article found with the id: 9999");
 			});
 	});
 });
