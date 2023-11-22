@@ -95,5 +95,11 @@
 				"article_id": 5
 			}
 		}
+	},
+	"DELETE /api/comments/:comment_id": {
+		"description": "removes the specified comment from the database, doesn't respond with anything if successfully deleted",
+		"queries": [],
+		"format": {},
+		"exampleResponse": {}
 	}
 }
