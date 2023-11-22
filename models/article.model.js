@@ -16,7 +16,7 @@ exports.selectAllArticles = () => {
 		});
 };
 
-exports.selectArticleById = (article_id) => {
+exports.selectArticleById = (article_id, comments_count = 0) => {
 	return db
 		.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
 		.then(({ rows }) => {
@@ -27,6 +27,6 @@ exports.selectArticleById = (article_id) => {
 				});
 			}
 
-			return rows[0];
+			return { ...rows[0], comment_count: comments_count };
 		});
 };

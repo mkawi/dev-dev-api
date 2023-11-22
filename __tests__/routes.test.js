@@ -78,7 +78,7 @@ describe("GET: /api/articles", () => {
 });
 
 describe("GET: /api/articles/:article_id", () => {
-	test("200: successfully responds with a JSON of a single article with the same article_id as the route parameter", () => {
+	test("200: successfully responds with a single article with the same article_id as the route parameter", () => {
 		return request(app)
 			.get("/api/articles/3")
 			.expect(200)
@@ -94,6 +94,7 @@ describe("GET: /api/articles/:article_id", () => {
 					votes: 0,
 					article_img_url:
 						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+					comment_count: 2,
 				});
 			});
 	});

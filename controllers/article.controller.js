@@ -18,7 +18,10 @@ exports.getAllArticles = (req, res, next) => {
 exports.getArticleById = (req, res, next) => {
 	const { article_id } = req.params;
 
-	selectArticleById(article_id)
+	selectCommentsByArticleId(article_id)
+		.then((comments) => {
+			return selectArticleById(article_id, comments.length);
+		})
 		.then((article) => {
 			res.status(200).send({ article });
 		})
