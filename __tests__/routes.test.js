@@ -75,6 +75,67 @@ describe("GET: /api/articles", () => {
 				expect(articles).toBeSortedBy("created_at", { descending: true });
 			});
 	});
+
+	// FEATURE REQUEST The endpoint should also accept the following query:
+	// topic, which filters the articles by the topic value specified in the query.
+	// If the query is omitted, the endpoint should respond with all articles.
+	// Consider what errors could occur with this endpoint, and make sure to test for them.
+	// Remember to add a description of this endpoint to your /api endpoint.
+
+	test("200: successfully responds with an array of article objects filtered by the topic query", () => {
+		return request(app)
+			.get("/api/articles?topic=mitch")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { articles } }) => {
+				expect(articles.length).toBe(12);
+
+				articles.forEach((article) => {
+					expect(article).toMatchObject({
+						article_id: expect.any(Number),
+						title: expect.any(String),
+						author: expect.any(String),
+						topic: "mitch",
+						created_at: expect.any(String),
+						votes: expect.any(Number),
+						article_img_url: expect.any(String),
+						comment_count: expect.any(Number),
+					});
+
+					expect(article.body).toBe(undefined);
+				});
+
+				expect(articles).toBeSortedBy("created_at", { descending: true });
+			});
+	});
+
+	test("200: responds with an empty array if topic is valid but there are no articles with that topic", () => {
+		return request(app)
+			.get("/api/articles?topic=paper")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { articles } }) => {
+				expect(articles.length).toBe(0);
+			});
+	});
+
+	test("400: responds with invalid topic error if topic does not exist in database", () => {
+		return request(app)
+			.get("/api/articles?topic=machine")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Invalid Query: No machine topic found");
+			});
+	});
+
+	test("400: responds with bad request error if topic is of an invalid data type", () => {
+		return request(app)
+			.get("/api/articles?topic=5000")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
+			});
+	});
 });
 
 describe("GET: /api/articles/:article_id", () => {

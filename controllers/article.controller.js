@@ -6,10 +6,18 @@ const {
 	selectCommentsByArticleId,
 	insertCommentByArticleId,
 } = require("../models/comment.model");
+const { selectTopic } = require("../models/topic.model");
 
 exports.getAllArticles = (req, res, next) => {
-	selectAllArticles()
-		.then((articles) => {
+	const { topic } = req.query;
+	const promiseArr = [selectAllArticles(topic)];
+
+	if (topic) {
+		promiseArr.push(selectTopic(topic));
+	}
+
+	Promise.all(promiseArr)
+		.then(([articles]) => {
 			res.status(200).send({ articles });
 		})
 		.catch(next);

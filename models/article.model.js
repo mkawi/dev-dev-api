@@ -1,19 +1,24 @@
 const db = require("../db/connection");
 
-exports.selectAllArticles = () => {
-	return db
-		.query(
-			`SELECT articles.article_id, articles.title, articles.author, 
+exports.selectAllArticles = (topic) => {
+	let query = `SELECT articles.article_id, articles.title, articles.author, 
                 articles.topic, articles.created_at, articles.votes, 
                 article_img_url, COUNT(comment_id)::int AS comment_count 
-            FROM articles
-            LEFT JOIN comments ON comments.article_id = articles.article_id
-            GROUP BY articles.article_id 
-            ORDER BY articles.created_at DESC;`
-		)
-		.then(({ rows }) => {
-			return rows;
-		});
+				FROM articles
+				LEFT JOIN comments ON comments.article_id = articles.article_id`;
+
+	const queryValues = [];
+
+	if (topic) {
+		query += ` WHERE topic = $1`;
+		queryValues.push(topic);
+	}
+
+	query += ` GROUP BY articles.article_id ORDER BY articles.created_at DESC`;
+
+	return db.query(query, queryValues).then(({ rows }) => {
+		return rows;
+	});
 };
 
 exports.selectArticleById = (article_id) => {
