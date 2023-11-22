@@ -10,3 +10,27 @@ exports.selectCommentsByArticleId = (article_id) => {
 			return rows;
 		});
 };
+
+exports.insertCommentByArticleId = (article_id, commentBody) => {
+	// Checks to see if body & username is present and both data types are valid
+	if (
+		commentBody.body &&
+		commentBody.username &&
+		(typeof commentBody.body !== "string" ||
+			typeof commentBody.username !== "string")
+	) {
+		return Promise.reject({
+			status: 400,
+			msg: "Invalid Request: Properties contain incorrect data types",
+		});
+	}
+
+	return db
+		.query(
+			`INSERT INTO comments (body, article_id, author, votes, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+			[commentBody.body, article_id, commentBody.username, 0, new Date()]
+		)
+		.then(({ rows }) => {
+			return rows[0];
+		});
+};

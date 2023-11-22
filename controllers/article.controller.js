@@ -1,20 +1,26 @@
-const { selectAllArticles, selectArticleById } = require("../models/article.model");
-const { selectCommentsByArticleId } = require("../models/comment.model");
+const {
+	selectAllArticles,
+	selectArticleById,
+} = require("../models/article.model");
+const {
+	selectCommentsByArticleId,
+	insertCommentByArticleId,
+} = require("../models/comment.model");
 
 exports.getAllArticles = (req, res, next) => {
 	selectAllArticles()
 		.then((articles) => {
 			res.status(200).send({ articles });
-  })
-  .catch(next);
+		})
+		.catch(next);
 };
-  
+
 exports.getArticleById = (req, res, next) => {
 	const { article_id } = req.params;
 
 	selectArticleById(article_id)
 		.then((article) => {
-			res.status(200).send({ article: article });
+			res.status(200).send({ article });
 		})
 		.catch(next);
 };
@@ -27,7 +33,18 @@ exports.getCommentsByArticleId = (req, res, next) => {
 		selectCommentsByArticleId(article_id),
 	])
 		.then(([article, comments]) => {
-			res.status(200).send({ comments: comments });
+			res.status(200).send({ comments });
+		})
+		.catch(next);
+};
+
+exports.postCommentByArticleId = (req, res, next) => {
+	const { article_id } = req.params;
+	const { body } = req;
+
+	insertCommentByArticleId(article_id, body)
+		.then((comment) => {
+			res.status(200).send({ comment });
 		})
 		.catch(next);
 };

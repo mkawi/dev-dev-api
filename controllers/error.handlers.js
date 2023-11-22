@@ -14,6 +14,17 @@ exports.handleCustomErrors = (err, req, res, next) => {
 exports.handlePsqlErrors = (err, req, res, next) => {
 	if (err.code === "22P02") {
 		res.status(400).send({ msg: "Bad Request!" });
+	} else if (err.code === "23502") {
+		res.status(400).send({
+			msg: "Invalid Request: Missing required properties in request body",
+		});
+	} else if (
+		err.code === "23503" &&
+		err.detail.endsWith('is not present in table "users".')
+	) {
+		res.status(404).send({
+			msg: `No valid user with the username: ${req.body.username}`,
+		});
 	} else {
 		next(err);
 	}
