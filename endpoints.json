@@ -71,11 +71,29 @@
 					"comment_id": 2,
 					"author": "gandalf_the_grey",
 					"created_at": "2018-05-30T15:59:13.341Z",
-					"body": "You shall not pass!",
+					"body": "YOU SHALL NOT PASS!",
 					"votes": 7,
 					"article_id": 3
 				}
 			]
+		}
+	},
+	"POST /api/articles/:article_id/comments": {
+		"description": "endpoint for adding individual comments to a single article, returns the posted comment back",
+		"queries": [],
+		"format": {
+			"username": "gandalf_the_grey",
+			"body": "YOU SHALL NOT PASS!"
+		},
+		"exampleResponse": {
+			"comment": {
+				"comment_id": 3,
+				"author": "gandalf_the_grey",
+				"created_at": "2023-11-22T15:59:13.341Z",
+				"body": "YOU SHALL NOT PASS!",
+				"votes": 0,
+				"article_id": 5
+			}
 		}
 	}
 }
