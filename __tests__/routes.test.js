@@ -290,6 +290,44 @@ describe("POST: /api/articles/:article_id/comments", () => {
 	});
 });
 
+// CORE: DELETE /api/comments/:comment_id
+// Description
+// Should:
+
+// be available on /api/comments/:comment_id.
+// delete the given comment by comment_id.
+// Responds with:
+
+// status 204 and no content.
+// Consider what errors could occur with this endpoint, and make sure to test for them.
+
+// Remember to add a description of this endpoint to your /api endpoint.
+
+describe("DELETE: /api/comments/:comment_id", () => {
+	test("204: successfully deletes a comment by its id", () => {
+		return request(app).delete("/api/comments/5").expect(204);
+	});
+
+	test("404: returns a 404 comment not found if comment_id isn't present in the database", () => {
+		return request(app)
+			.delete("/api/comments/5000")
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.status).toBe(404);
+				expect(body.msg).toBe("No comment found with the id: 5000");
+			});
+	});
+
+	test("400: returns a bad request if the comment_id is not of a valid data type (integer)", () => {
+		return request(app)
+			.delete("/api/comments/elden_beast")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
+			});
+	});
+});
+
 describe("404: Handle routes that don't exist", () => {
 	test("GET requests", () => {
 		return request(app)

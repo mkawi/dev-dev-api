@@ -12,6 +12,7 @@ const {
 	getCommentsByArticleId,
 	postCommentByArticleId,
 } = require("./controllers/article.controller");
+const { deleteSingleComment } = require("./controllers/comment.controller");
 
 app.get("/api", getApi);
 
@@ -22,6 +23,8 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postCommentByArticleId);
+
+app.delete("/api/comments/:comment_id", deleteSingleComment);
 
 // 404 & Error Handlers
 const {
