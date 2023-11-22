@@ -12,6 +12,7 @@ const {
 	getCommentsByArticleId,
 	postCommentByArticleId,
 } = require("./controllers/article.controller");
+const { getAllUsers } = require("./controllers/user.controller");
 
 app.get("/api", getApi);
 
@@ -22,6 +23,8 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postCommentByArticleId);
+
+app.get("/api/users", getAllUsers);
 
 // 404 & Error Handlers
 const {

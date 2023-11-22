@@ -48,6 +48,26 @@ describe("GET: /api/topics", () => {
 	});
 });
 
+describe("GET: /api/users", () => {
+	test("200: successfully responds with an array of user objects", () => {
+		return request(app)
+			.get("/api/users")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { users } }) => {
+				expect(users.length).toBe(4);
+
+				users.forEach((user) => {
+					expect(user).toMatchObject({
+						username: expect.any(String),
+						name: expect.any(String),
+						avatar_url: expect.any(String),
+					});
+				});
+			});
+	});
+});
+
 describe("GET: /api/articles", () => {
 	test("200: successfully responds with an array of article objects without the body property and ordered by created_at date", () => {
 		return request(app)
