@@ -32,7 +32,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
 		selectArticleById(article_id),
 		selectCommentsByArticleId(article_id),
 	])
-		.then(([article, comments]) => {
+		.then(([, comments]) => {
 			res.status(200).send({ comments });
 		})
 		.catch(next);
@@ -42,9 +42,12 @@ exports.postCommentByArticleId = (req, res, next) => {
 	const { article_id } = req.params;
 	const { body } = req;
 
-	insertCommentByArticleId(article_id, body)
-		.then((comment) => {
-			res.status(200).send({ comment });
+	Promise.all([
+		selectArticleById(article_id),
+		insertCommentByArticleId(article_id, body),
+	])
+		.then(([, comment]) => {
+			res.status(201).send({ comment });
 		})
 		.catch(next);
 };
