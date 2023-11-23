@@ -204,7 +204,9 @@ describe("PATCH: /api/articles/:article_id", () => {
 			.expect(400)
 			.send({ title: "example title" })
 			.then(({ body }) => {
-				expect(body.msg).toBe("Bad Request!");
+				expect(body.msg).toBe(
+					"Invalid Request: Missing required properties in request body"
+				);
 			});
 	});
 
