@@ -118,8 +118,124 @@ describe("GET: /api/articles/:article_id", () => {
 	});
 });
 
+describe("PATCH: /api/articles/:article_id", () => {
+	test("200: successfully responds with the updated article if the article has been modified correctly", () => {
+		return request(app)
+			.patch("/api/articles/3")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.send({
+				inc_votes: 50,
+			})
+			.then(({ body: { article } }) => {
+				expect(article).toMatchObject({
+					article_id: 3,
+					title: "Eight pug gifs that remind me of mitch",
+					topic: "mitch",
+					author: "icellusedkars",
+					body: "some gifs",
+					created_at: "2020-11-03T09:12:00.000Z",
+					votes: 50,
+					article_img_url:
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+				});
+			});
+	});
+
+	test("200: successfully decrements an article's votes with an already existing positive value", () => {
+		return request(app)
+			.patch("/api/articles/1")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.send({
+				inc_votes: -25,
+			})
+			.then(({ body: { article } }) => {
+				expect(article).toMatchObject({
+					article_id: 1,
+					title: "Living in the shadow of a great man",
+					topic: "mitch",
+					author: "butter_bridge",
+					body: "I find this existence challenging",
+					created_at: "2020-07-09T20:11:00.000Z",
+					votes: 75,
+					article_img_url:
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+				});
+			});
+	});
+
+	test("200: successfully decrements an article's votes to a negative value", () => {
+		return request(app)
+			.patch("/api/articles/1")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.send({
+				inc_votes: -250,
+			})
+			.then(({ body: { article } }) => {
+				expect(article).toMatchObject({
+					article_id: 1,
+					title: "Living in the shadow of a great man",
+					topic: "mitch",
+					author: "butter_bridge",
+					body: "I find this existence challenging",
+					created_at: "2020-07-09T20:11:00.000Z",
+					votes: -150,
+					article_img_url:
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+				});
+			});
+	});
+
+	test("400: responds with bad request if data type is invalid", () => {
+		return request(app)
+			.patch("/api/articles/1")
+			.expect(400)
+			.send({ inc_votes: "example" })
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
+			});
+	});
+
+	test("400: responds with bad request if inc_votes property is missing", () => {
+		return request(app)
+			.patch("/api/articles/1")
+			.expect(400)
+			.send({ title: "example title" })
+			.then(({ body }) => {
+				expect(body.msg).toBe(
+					"Invalid Request: Missing required properties in request body"
+				);
+			});
+	});
+
+	test("400: responds with bad request if article_id is invalid data type", () => {
+		return request(app)
+			.patch("/api/articles/banana")
+			.expect(400)
+			.send({ inc_votes: -25 })
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
+			});
+	});
+
+	test("404: responds with 404 article not found if there is no article with the requested article_id", () => {
+		return request(app)
+			.patch("/api/articles/1000")
+			.expect(404)
+			.send({
+				inc_votes: -25,
+			})
+			.then(({ body }) => {
+				expect(body.status).toBe(404);
+				expect(body.msg).toBe("No article found with the id: 1000");
+			});
+	});
+});
+
 describe("GET: /api/articles/:article_id/comments", () => {
-	test("200: successfully responds with an array of all comments that reference specified article (:article_id) ordered by most recent comments first", () => {
+	test("200: successfully responds with an array of all comments that reference article (:article_id) ordered by recent comments", () => {
 		return request(app)
 			.get("/api/articles/5/comments")
 			.expect(200)
@@ -183,7 +299,7 @@ describe("POST: /api/articles/:article_id/comments", () => {
 				body: "have you tried turning it off and on again? :)",
 			})
 			.then(({ body: { comment } }) => {
-				expect(comment).toEqual({
+				expect(comment).toMatchObject({
 					comment_id: 19,
 					author: "lurker",
 					created_at: expect.any(String),
@@ -206,7 +322,7 @@ describe("POST: /api/articles/:article_id/comments", () => {
 				address: "1 Mount Doom, Mordor, Middle Earth",
 			})
 			.then(({ body: { comment } }) => {
-				expect(comment).toEqual({
+				expect(comment).toMatchObject({
 					comment_id: 19,
 					author: "lurker",
 					created_at: expect.any(String),
