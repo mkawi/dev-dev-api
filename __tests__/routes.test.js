@@ -208,6 +208,16 @@ describe("PATCH: /api/articles/:article_id", () => {
 			});
 	});
 
+	test("400: responds with bad request if article_id is invalid data type", () => {
+		return request(app)
+			.patch("/api/articles/banana")
+			.expect(400)
+			.send({ inc_votes: -25 })
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
+			});
+	});
+
 	test("404: responds with 404 article not found if there is no article with the requested article_id", () => {
 		return request(app)
 			.patch("/api/articles/1000")
