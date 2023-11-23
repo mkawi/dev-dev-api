@@ -8,8 +8,16 @@ const {
 } = require("../models/comment.model");
 
 exports.getAllArticles = (req, res, next) => {
-	selectAllArticles()
-		.then((articles) => {
+	const { topic, sort_by, order } = req.query;
+
+	const promiseArr = [selectAllArticles(topic, sort_by, order)];
+
+	if (topic) {
+		promiseArr.push(selectTopic(topic));
+	}
+
+	Promise.all(promiseArr)
+		.then(([articles]) => {
 			res.status(200).send({ articles });
 		})
 		.catch(next);

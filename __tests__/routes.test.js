@@ -75,6 +75,46 @@ describe("GET: /api/articles", () => {
 				expect(articles).toBeSortedBy("created_at", { descending: true });
 			});
 	});
+
+	test("200: successfully responds with an array of articles ordered by comment_count in descending order", () => {
+		return request(app)
+			.get("/api/articles?sort_by=comment_count&order=DESC")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { articles } }) => {
+				expect(articles).toBeSortedBy("comment_count", { descending: true });
+			});
+	});
+
+	test("200: successfully responds with an array of articles ordered by title in ascending order", () => {
+		return request(app)
+			.get("/api/articles?sort_by=title&order=ASC")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { articles } }) => {
+				expect(articles).toBeSortedBy("title");
+			});
+	});
+
+	test("400: responds with a custom error if column is not valid to sort_by", () => {
+		return request(app)
+			.get("/api/articles?sort_by=cost&order=ASC")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Invalid Query: cost is not a valid column");
+			});
+	});
+
+	test("400: responds with a custom error if column is not valid order type", () => {
+		return request(app)
+			.get("/api/articles?sort_by=title&order=weight")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe(
+					"Invalid Query: weight is not valid (ASC or DESC)"
+				);
+			});
+	});
 });
 
 describe("GET: /api/articles/:article_id", () => {
