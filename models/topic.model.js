@@ -20,7 +20,7 @@ exports.selectTopic = (slug) => {
 		.then(({ rows }) => {
 			if (!rows.length) {
 				return Promise.reject({
-					status: 400,
+					status: 404,
 					msg: `Invalid Query: No ${slug} topic found`,
 				});
 			}

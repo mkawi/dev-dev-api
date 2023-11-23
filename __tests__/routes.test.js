@@ -113,10 +113,10 @@ describe("GET: /api/articles", () => {
 			});
 	});
 
-	test("400: responds with invalid topic error if topic does not exist in database", () => {
+	test("404: responds with invalid topic error if topic does not exist in database", () => {
 		return request(app)
 			.get("/api/articles?topic=machine")
-			.expect(400)
+			.expect(404)
 			.then(({ body }) => {
 				expect(body.msg).toBe("Invalid Query: No machine topic found");
 			});
