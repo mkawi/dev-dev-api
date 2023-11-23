@@ -76,12 +76,6 @@ describe("GET: /api/articles", () => {
 			});
 	});
 
-	// FEATURE REQUEST The endpoint should also accept the following query:
-	// topic, which filters the articles by the topic value specified in the query.
-	// If the query is omitted, the endpoint should respond with all articles.
-	// Consider what errors could occur with this endpoint, and make sure to test for them.
-	// Remember to add a description of this endpoint to your /api endpoint.
-
 	test("200: successfully responds with an array of article objects filtered by the topic query", () => {
 		return request(app)
 			.get("/api/articles?topic=mitch")
@@ -102,7 +96,7 @@ describe("GET: /api/articles", () => {
 						comment_count: expect.any(Number),
 					});
 
-					expect(article.body).toBe(undefined);
+					expect(article.hasOwnProperty("body")).toBe(false);
 				});
 
 				expect(articles).toBeSortedBy("created_at", { descending: true });
@@ -115,7 +109,7 @@ describe("GET: /api/articles", () => {
 			.expect(200)
 			.expect("Content-Type", /json/)
 			.then(({ body: { articles } }) => {
-				expect(articles.length).toBe(0);
+				expect(articles).toEqual([]);
 			});
 	});
 
