@@ -48,6 +48,26 @@ describe("GET: /api/topics", () => {
 	});
 });
 
+describe("GET: /api/users", () => {
+	test("200: successfully responds with an array of user objects", () => {
+		return request(app)
+			.get("/api/users")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { users } }) => {
+				expect(users.length).toBe(4);
+
+				users.forEach((user) => {
+					expect(user).toMatchObject({
+						username: expect.any(String),
+						name: expect.any(String),
+						avatar_url: expect.any(String),
+					});
+				});
+			});
+	});
+});
+
 describe("GET: /api/articles", () => {
 	test("200: successfully responds with an array of article objects without the body property and ordered by created_at date", () => {
 		return request(app)
@@ -69,12 +89,67 @@ describe("GET: /api/articles", () => {
 						comment_count: expect.any(Number),
 					});
 
-					expect(article.body).toBe(undefined);
+					expect(article.hasOwnProperty("body")).toBe(false);
 				});
 
 				expect(articles).toBeSortedBy("created_at", { descending: true });
 			});
 	});
+  
+  test("200: successfully responds with an array of article objects filtered by the topic query", () => {
+  return request(app)
+    .get("/api/articles?topic=mitch")
+    .expect(200)
+    .expect("Content-Type", /json/)
+    .then(({ body: { articles } }) => {
+      expect(articles.length).toBe(12);
+
+      articles.forEach((article) => {
+        expect(article).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          author: expect.any(String),
+          topic: "mitch",
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: expect.any(Number),
+        });
+
+        expect(article.hasOwnProperty("body")).toBe(false);
+      });
+
+      expect(articles).toBeSortedBy("created_at", { descending: true });
+    });
+});
+  
+  test("200: responds with an empty array if topic is valid but there are no articles with that topic", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .expect("Content-Type", /json/)
+      .then(({ body: { articles } }) => {
+        expect(articles).toEqual([]);
+      });
+  });
+
+  test("404: responds with invalid topic error if topic does not exist in database", () => {
+    return request(app)
+      .get("/api/articles?topic=machine")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid Query: No machine topic found");
+      });
+  });
+
+  test("400: responds with bad request error if topic is of an invalid data type", () => {
+    return request(app)
+      .get("/api/articles?topic=5000")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request!");
+      });
+  });
 
 	test("200: successfully responds with an array of articles ordered by comment_count in descending order", () => {
 		return request(app)
@@ -113,12 +188,12 @@ describe("GET: /api/articles", () => {
 				expect(body.msg).toBe(
 					"Invalid Query: weight is not valid (ASC or DESC)"
 				);
-			});
+      });
 	});
 });
 
 describe("GET: /api/articles/:article_id", () => {
-	test("200: successfully responds with a JSON of a single article with the same article_id as the route parameter", () => {
+	test("200: successfully responds with a single article with the same article_id as the route parameter", () => {
 		return request(app)
 			.get("/api/articles/3")
 			.expect(200)
@@ -134,6 +209,27 @@ describe("GET: /api/articles/:article_id", () => {
 					votes: 0,
 					article_img_url:
 						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+				});
+			});
+	});
+
+	test("200: successfully responds with a single article with an additional comment_count property", () => {
+		return request(app)
+			.get("/api/articles/1")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { article } }) => {
+				expect(article).toMatchObject({
+					article_id: 1,
+					title: "Living in the shadow of a great man",
+					topic: "mitch",
+					author: "butter_bridge",
+					body: "I find this existence challenging",
+					created_at: "2020-07-09T20:11:00.000Z",
+					votes: 100,
+					article_img_url:
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+					comment_count: 11,
 				});
 			});
 	});
@@ -158,8 +254,124 @@ describe("GET: /api/articles/:article_id", () => {
 	});
 });
 
+describe("PATCH: /api/articles/:article_id", () => {
+	test("200: successfully responds with the updated article if the article has been modified correctly", () => {
+		return request(app)
+			.patch("/api/articles/3")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.send({
+				inc_votes: 50,
+			})
+			.then(({ body: { article } }) => {
+				expect(article).toMatchObject({
+					article_id: 3,
+					title: "Eight pug gifs that remind me of mitch",
+					topic: "mitch",
+					author: "icellusedkars",
+					body: "some gifs",
+					created_at: "2020-11-03T09:12:00.000Z",
+					votes: 50,
+					article_img_url:
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+				});
+			});
+	});
+
+	test("200: successfully decrements an article's votes with an already existing positive value", () => {
+		return request(app)
+			.patch("/api/articles/1")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.send({
+				inc_votes: -25,
+			})
+			.then(({ body: { article } }) => {
+				expect(article).toMatchObject({
+					article_id: 1,
+					title: "Living in the shadow of a great man",
+					topic: "mitch",
+					author: "butter_bridge",
+					body: "I find this existence challenging",
+					created_at: "2020-07-09T20:11:00.000Z",
+					votes: 75,
+					article_img_url:
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+				});
+			});
+	});
+
+	test("200: successfully decrements an article's votes to a negative value", () => {
+		return request(app)
+			.patch("/api/articles/1")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.send({
+				inc_votes: -250,
+			})
+			.then(({ body: { article } }) => {
+				expect(article).toMatchObject({
+					article_id: 1,
+					title: "Living in the shadow of a great man",
+					topic: "mitch",
+					author: "butter_bridge",
+					body: "I find this existence challenging",
+					created_at: "2020-07-09T20:11:00.000Z",
+					votes: -150,
+					article_img_url:
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+				});
+			});
+	});
+
+	test("400: responds with bad request if data type is invalid", () => {
+		return request(app)
+			.patch("/api/articles/1")
+			.expect(400)
+			.send({ inc_votes: "example" })
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
+			});
+	});
+
+	test("400: responds with bad request if inc_votes property is missing", () => {
+		return request(app)
+			.patch("/api/articles/1")
+			.expect(400)
+			.send({ title: "example title" })
+			.then(({ body }) => {
+				expect(body.msg).toBe(
+					"Invalid Request: Missing required properties in request body"
+				);
+			});
+	});
+
+	test("400: responds with bad request if article_id is invalid data type", () => {
+		return request(app)
+			.patch("/api/articles/banana")
+			.expect(400)
+			.send({ inc_votes: -25 })
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
+			});
+	});
+
+	test("404: responds with 404 article not found if there is no article with the requested article_id", () => {
+		return request(app)
+			.patch("/api/articles/1000")
+			.expect(404)
+			.send({
+				inc_votes: -25,
+			})
+			.then(({ body }) => {
+				expect(body.status).toBe(404);
+				expect(body.msg).toBe("No article found with the id: 1000");
+			});
+	});
+});
+
 describe("GET: /api/articles/:article_id/comments", () => {
-	test("200: successfully responds with an array of all comments that reference specified article (:article_id) ordered by most recent comments first", () => {
+	test("200: successfully responds with an array of all comments that reference article (:article_id) ordered by recent comments", () => {
 		return request(app)
 			.get("/api/articles/5/comments")
 			.expect(200)
@@ -223,7 +435,7 @@ describe("POST: /api/articles/:article_id/comments", () => {
 				body: "have you tried turning it off and on again? :)",
 			})
 			.then(({ body: { comment } }) => {
-				expect(comment).toEqual({
+				expect(comment).toMatchObject({
 					comment_id: 19,
 					author: "lurker",
 					created_at: expect.any(String),
@@ -246,7 +458,7 @@ describe("POST: /api/articles/:article_id/comments", () => {
 				address: "1 Mount Doom, Mordor, Middle Earth",
 			})
 			.then(({ body: { comment } }) => {
-				expect(comment).toEqual({
+				expect(comment).toMatchObject({
 					comment_id: 19,
 					author: "lurker",
 					created_at: expect.any(String),
@@ -326,6 +538,31 @@ describe("POST: /api/articles/:article_id/comments", () => {
 			.then(({ body }) => {
 				expect(body.status).toBe(404);
 				expect(body.msg).toBe("No article found with the id: 9999");
+			});
+	});
+});
+
+describe("DELETE: /api/comments/:comment_id", () => {
+	test("204: successfully deletes a comment by its id", () => {
+		return request(app).delete("/api/comments/5").expect(204);
+	});
+
+	test("404: returns a 404 comment not found if comment_id isn't present in the database", () => {
+		return request(app)
+			.delete("/api/comments/5000")
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.status).toBe(404);
+				expect(body.msg).toBe("No comment found with the id: 5000");
+			});
+	});
+
+	test("400: returns a bad request if the comment_id is not of a valid data type (integer)", () => {
+		return request(app)
+			.delete("/api/comments/elden_beast")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request!");
 			});
 	});
 });
