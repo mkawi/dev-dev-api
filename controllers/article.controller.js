@@ -11,8 +11,8 @@ const {
 const { selectTopic } = require("../models/topic.model");
 
 exports.getAllArticles = (req, res, next) => {
-	const { topic } = req.query;
-	const promiseArr = [selectAllArticles(topic)];
+	const { topic, sort_by, order } = req.query;
+	const promiseArr = [selectAllArticles(topic, sort_by, order)];
 
 	if (topic) {
 		promiseArr.push(selectTopic(topic));

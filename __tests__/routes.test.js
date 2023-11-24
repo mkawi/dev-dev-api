@@ -89,66 +89,106 @@ describe("GET: /api/articles", () => {
 						comment_count: expect.any(Number),
 					});
 
-					expect(article.body).toBe(undefined);
-				});
-
-				expect(articles).toBeSortedBy("created_at", { descending: true });
-			});
-	});
-
-	test("200: successfully responds with an array of article objects filtered by the topic query", () => {
-		return request(app)
-			.get("/api/articles?topic=mitch")
-			.expect(200)
-			.expect("Content-Type", /json/)
-			.then(({ body: { articles } }) => {
-				expect(articles.length).toBe(12);
-
-				articles.forEach((article) => {
-					expect(article).toMatchObject({
-						article_id: expect.any(Number),
-						title: expect.any(String),
-						author: expect.any(String),
-						topic: "mitch",
-						created_at: expect.any(String),
-						votes: expect.any(Number),
-						article_img_url: expect.any(String),
-						comment_count: expect.any(Number),
-					});
-
 					expect(article.hasOwnProperty("body")).toBe(false);
 				});
 
 				expect(articles).toBeSortedBy("created_at", { descending: true });
 			});
 	});
+  
+  test("200: successfully responds with an array of article objects filtered by the topic query", () => {
+  return request(app)
+    .get("/api/articles?topic=mitch")
+    .expect(200)
+    .expect("Content-Type", /json/)
+    .then(({ body: { articles } }) => {
+      expect(articles.length).toBe(12);
 
-	test("200: responds with an empty array if topic is valid but there are no articles with that topic", () => {
+      articles.forEach((article) => {
+        expect(article).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          author: expect.any(String),
+          topic: "mitch",
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: expect.any(Number),
+        });
+
+        expect(article.hasOwnProperty("body")).toBe(false);
+      });
+
+      expect(articles).toBeSortedBy("created_at", { descending: true });
+    });
+});
+  
+  test("200: responds with an empty array if topic is valid but there are no articles with that topic", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .expect("Content-Type", /json/)
+      .then(({ body: { articles } }) => {
+        expect(articles).toEqual([]);
+      });
+  });
+
+  test("404: responds with invalid topic error if topic does not exist in database", () => {
+    return request(app)
+      .get("/api/articles?topic=machine")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid Query: No machine topic found");
+      });
+  });
+
+  test("400: responds with bad request error if topic is of an invalid data type", () => {
+    return request(app)
+      .get("/api/articles?topic=5000")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request!");
+      });
+  });
+
+	test("200: successfully responds with an array of articles ordered by comment_count in descending order", () => {
 		return request(app)
-			.get("/api/articles?topic=paper")
+			.get("/api/articles?sort_by=comment_count&order=DESC")
 			.expect(200)
 			.expect("Content-Type", /json/)
 			.then(({ body: { articles } }) => {
-				expect(articles).toEqual([]);
+				expect(articles).toBeSortedBy("comment_count", { descending: true });
 			});
 	});
 
-	test("404: responds with invalid topic error if topic does not exist in database", () => {
+	test("200: successfully responds with an array of articles ordered by title in ascending order", () => {
 		return request(app)
-			.get("/api/articles?topic=machine")
-			.expect(404)
-			.then(({ body }) => {
-				expect(body.msg).toBe("Invalid Query: No machine topic found");
+			.get("/api/articles?sort_by=title&order=ASC")
+			.expect(200)
+			.expect("Content-Type", /json/)
+			.then(({ body: { articles } }) => {
+				expect(articles).toBeSortedBy("title");
 			});
 	});
 
-	test("400: responds with bad request error if topic is of an invalid data type", () => {
+	test("400: responds with a custom error if column is not valid to sort_by", () => {
 		return request(app)
-			.get("/api/articles?topic=5000")
+			.get("/api/articles?sort_by=cost&order=ASC")
 			.expect(400)
 			.then(({ body }) => {
-				expect(body.msg).toBe("Bad Request!");
+				expect(body.msg).toBe("Invalid Query: cost is not a valid column");
 			});
+	});
+
+	test("400: responds with a custom error if column is not valid order type", () => {
+		return request(app)
+			.get("/api/articles?sort_by=title&order=weight")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe(
+					"Invalid Query: weight is not valid (ASC or DESC)"
+				);
+      });
 	});
 });
 
@@ -501,19 +541,6 @@ describe("POST: /api/articles/:article_id/comments", () => {
 			});
 	});
 });
-
-// CORE: DELETE /api/comments/:comment_id
-// Description
-// Should:
-
-// be available on /api/comments/:comment_id.
-// delete the given comment by comment_id.
-// Responds with:
-
-// status 204 and no content.
-// Consider what errors could occur with this endpoint, and make sure to test for them.
-
-// Remember to add a description of this endpoint to your /api endpoint.
 
 describe("DELETE: /api/comments/:comment_id", () => {
 	test("204: successfully deletes a comment by its id", () => {
